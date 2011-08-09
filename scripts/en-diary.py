@@ -48,7 +48,6 @@ def main(argv=None):
     
     evernote = app("EverNote")
     todays_title = date.today().strftime("%B %d, %Y")
-    # TODO: scope find to DIARY_NOTEBOOK
     todays_notes = evernote.find_notes(
         "\"{0}\" + notebook:\"{1}\"".format(todays_title, DIARY_NOTEBOOK))
     if len(todays_notes):
