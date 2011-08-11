@@ -36,6 +36,15 @@ class EverNote(object):
         return Notes(cls.__get_app().find_notes(search_term))
 
     @classmethod
+    def open_collection_window(cls, query_string=None):
+        """Open a collection window"""
+        # TODO: handle other arguments besides query_string
+        kwargs={}
+        if query_string:
+            kwargs["with_query_string"] = query_string
+        return cls.__get_app().open_collection_window(**kwargs)
+
+    @classmethod
     def open_note_window(cls, note):
         return cls.__get_app().open_note_window(with_=note)
 

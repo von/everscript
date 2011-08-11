@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 """Search Evernote notes
 """
-from appscript import app
 import argparse
 import logging
 import sys
 
-# Note book containing my diary entries
-DIARY_NOTEBOOK="Diary"
+from everscript import EverNote
 
 def main(argv=None):
     # Do argv default this way, as doing it in the functional
@@ -47,8 +45,7 @@ def main(argv=None):
     args = parser.parse_args()
     output_handler.setLevel(args.output_level)
     
-    evernote = app("EverNote")
-    evernote.open_collection_window(with_query_string=args.search_term)
+    EverNote.open_collection_window(query_string=args.search_term)
     return(0)
 
 if __name__ == "__main__":
