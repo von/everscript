@@ -7,6 +7,8 @@ from datetime import date
 import logging
 import sys
 
+from everscript import EverNote
+
 # Note book containing my diary entries
 DIARY_NOTEBOOK="Diary"
 
@@ -46,19 +48,17 @@ def main(argv=None):
     args = parser.parse_args()
     output_handler.setLevel(args.output_level)
     
-    evernote = app("EverNote")
     todays_title = date.today().strftime("%B %d, %Y")
-    todays_notes = evernote.find_notes(
-        "\"{0}\" + notebook:\"{1}\"".format(todays_title, DIARY_NOTEBOOK))
+    todays_notes = EverNote.find_notes(todays_title, notebook=DIARY_NOTEBOOK)
     if len(todays_notes):
         output.info("Opening existing diary for {}".format(todays_title))
         todays_note = todays_notes[0]
     else:
         output.info("Creating new diary for {}".format(todays_title))
-        todays_note = evernote.create_note(with_text="",
+        todays_note = EverNote.create_note(with_text="",
                                            title=todays_title,
                                            notebook=DIARY_NOTEBOOK)
-    evernote.open_note_window(with_=todays_note)
+    EverNote.open_note_window(todays_note)
     return(0)
 
 if __name__ == "__main__":
