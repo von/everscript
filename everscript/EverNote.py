@@ -46,6 +46,6 @@ class EverNote(object):
 
     @classmethod
     def open_note_window(cls, note):
-        return cls.__get_app().open_note_window(with_=note)
+        return cls.__get_app().open_note_window(with_=note.note)
 
         
