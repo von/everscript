@@ -2,6 +2,8 @@
 
 from operator import getitem
 
+from Note import Note
+
 class Notes(object):
 
     def __init__(self, notes):
@@ -17,6 +19,6 @@ class Notes(object):
             if i.step:
                 args.append(i.step)
             print args
-            return getitem(self.notes, *args)
+            return Notes(getitem(self.notes, *args))
         else:
-            return getitem(self.notes, i)
+            return Note(getitem(self.notes, i))
