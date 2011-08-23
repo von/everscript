@@ -3,4 +3,4 @@
 class Note(object):
 
     def __init__(self, note):
-        self.note = None
+        self.note = note
