@@ -18,7 +18,6 @@ class Notes(object):
             args.append(i.stop)
             if i.step:
                 args.append(i.step)
-            print args
             return Notes(getitem(self.notes, *args))
         else:
             return Note(getitem(self.notes, i))
