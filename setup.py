@@ -8,10 +8,7 @@ setup(
     name = "everscript",
     version = "0.1",
     packages = [ "everscript" ],
-    scripts = [
-        'scripts/en-diary.py',
-        'scripts/en-search.py',
-        ],
+    scripts = [ 'scripts/evernote.py' ],
     install_requires=['appscript >= 1.0'],
 
     author = "Von Welch",
