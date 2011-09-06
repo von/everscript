@@ -28,8 +28,8 @@ def list_todos(args, output, config):
 
 def daily_diary(args, output, config):
     todays_title = date.today().strftime("%B %d, %Y")
-    todays_notes = EverNote.find_notes(todays_title,
-                                       notebook=config.get("Diary", "Notebook"))
+    diary_notebook = config.get("Diary", "Notebook")
+    todays_notes = EverNote.find_notes(todays_title, notebook=diary_notebook)
     if len(todays_notes):
         output.info("Opening existing diary for {}".format(todays_title))
         todays_note = todays_notes[0]
@@ -37,7 +37,7 @@ def daily_diary(args, output, config):
         output.info("Creating new diary for {}".format(todays_title))
         todays_note = EverNote.create_note(with_text="",
                                            title=todays_title,
-                                           notebook=DIARY_NOTEBOOK)
+                                           notebook=diary_notebook)
     EverNote.open_note_window(todays_note)
     return(0)
 
