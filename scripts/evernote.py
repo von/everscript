@@ -35,7 +35,17 @@ def daily_diary(args, output, config):
         todays_note = todays_notes[0]
     else:
         output.info("Creating new diary for {}".format(todays_title))
-        todays_note = EverNote.create_note(with_text="",
+        try:
+            template_note_title = config.get("Diary", "Template")
+            output.debug("Using \"{}\" for template.".format(template_note_title ))
+            template_notes = EverNote.find_notes(template_note_title,
+                                                 notebook=diary_notebook)
+            html = template_notes[0].content()
+        except (ConfigParser.NoOptionError,
+                ConfigParser.NoSectionError) as e:
+            output.debug("No template in use: " + str(e))
+            html = ""
+        todays_note = EverNote.create_note(with_html=html,
                                            title=todays_title,
                                            notebook=diary_notebook)
     EverNote.open_note_window(todays_note)
