@@ -15,13 +15,16 @@ class EverNote(object):
         return app(app_name)
 
     @classmethod
-    def create_note(cls, with_text="", title="", notebook=None):
+    def create_note(cls, with_html=None, with_text=None, title="", notebook=None):
         """Create a note"""
         kwargs={
-            "with_text":with_text,
             "title":title,
             "notebook":notebook,
             }
+        if with_html is not None:
+            kwargs["with_html"] = with_html
+        if with_text is not None:
+            kwargs["with_text"] = with_text
         return Note(cls.__get_app().create_note(**kwargs))
 
     @classmethod
