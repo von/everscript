@@ -7,3 +7,7 @@ class Note(object):
 
     def title(self):
         return self.note.title.get()
+
+    def content(self):
+        """Return content as HTML"""
+        return self.note.HTML_content.get()
