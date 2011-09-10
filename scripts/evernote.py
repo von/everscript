@@ -180,8 +180,8 @@ def main(argv=None):
         output.debug("Parsing configuration file {}".format(args.config))
         config.read(conf_path)
 
-    cmd = args.cmd_class(config=config, logger=output)
     try:
+        cmd = args.cmd_class(config=config, logger=output)
         result = cmd.execute(args)
     except CommandException as e:
         output.error(str(e))
