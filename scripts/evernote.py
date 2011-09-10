@@ -20,36 +20,101 @@ import sys
 
 from everscript import EverNote, ToDos
 
-def list_todos(args, output, config):
-    todos = ToDos(config.get("ToDos", "Notebook"))
-    for todo in todos:
-        print todo.title()
-    return(0)
+######################################################################
 
-def daily_diary(args, output, config):
-    todays_title = date.today().strftime("%B %d, %Y")
-    diary_notebook = config.get("Diary", "Notebook")
-    todays_notes = EverNote.find_notes(todays_title, notebook=diary_notebook)
-    if len(todays_notes):
-        output.info("Opening existing diary for {}".format(todays_title))
-        todays_note = todays_notes[0]
-    else:
-        output.info("Creating new diary for {}".format(todays_title))
-        try:
-            template_note_title = config.get("Diary", "Template")
-            output.debug("Using \"{}\" for template.".format(template_note_title ))
-            template_notes = EverNote.find_notes(template_note_title,
-                                                 notebook=diary_notebook)
-            html = template_notes[0].content()
-        except (ConfigParser.NoOptionError,
-                ConfigParser.NoSectionError) as e:
-            output.debug("No template in use: " + str(e))
-            html = ""
-        todays_note = EverNote.create_note(with_html=html,
-                                           title=todays_title,
-                                           notebook=diary_notebook)
-    EverNote.open_note_window(todays_note)
-    return(0)
+class Command:
+    """Base class for commands"""
+    logger = None
+    conf = None
+
+    def __init__(self, **kwargs):
+        self.logger = kwargs["logger"]
+        self.conf = kwargs["config"]
+
+    #
+    # Config functions
+    def config(self, section, param):
+        """Get parameter from section.
+
+        Returns None if not defined."""
+        value = None
+        if self.conf:
+            try:
+                value = self.conf.get(section, param)
+            except (ConfigParser.NoOptionError,
+                    ConfigParser.NoSectionError) as e:
+                pass
+        return value
+
+    #
+    # Logging functions
+    def output(self, msg):
+        """Output a message."""
+        if self.logger:
+            self.logger.info(msg)
+
+    def info(self, msg):
+        """Log a message at info level"""
+        if self.logger:
+            self.logger.info(msg)
+
+    def debug(self, msg):
+        """Log a message at debug level"""
+        if self.logger:
+            self.logger.debug(msg)
+
+    def execute(self, args):
+        """Execute the command with given args namespace"""
+        raise NotImplementedError()
+
+class CommandException(Exception):
+    """Exception in command"""
+    pass
+
+class MissingConfigurationException(CommandException):
+    """Configuration missing"""
+    pass
+
+######################################################################
+#
+# Commands
+
+class ToDosCmd(Command):
+    def execute(self, args):
+        todo_notebook = self.config("ToDos", "Notebook")
+        if not todo_notebook:
+            raise MissingConfigurationException("No ToDos notebook defined")
+        todos = ToDos(todo_notebook)
+        for todo in todos:
+            self.output(todo.title())
+        return(0)
+
+class DiaryCmd(Command):
+    def execute(self, args):
+        todays_title = date.today().strftime("%B %d, %Y")
+        diary_notebook = self.config("Diary", "Notebook")
+        if not diary_notebook:
+            raise MissingConfigurationException("No Diary notebook defined")
+        todays_notes = EverNote.find_notes(todays_title, notebook=diary_notebook)
+        if len(todays_notes):
+            self.output("Opening existing diary for {}".format(todays_title))
+            todays_note = todays_notes[0]
+        else:
+            self.output("Creating new diary for {}".format(todays_title))
+            template_note_title = self.config("Diary", "Template")
+            if template_note_title:
+                self.debug("Using \"{}\" for template.".format(template_note_title ))
+                template_notes = EverNote.find_notes(template_note_title,
+                                                     notebook=diary_notebook)
+                html = template_notes[0].content()
+            else:
+                self.debug("No template in use: " + str(e))
+                html = ""
+            todays_note = EverNote.create_note(with_html=html,
+                                               title=todays_title,
+                                               notebook=diary_notebook)
+        EverNote.open_note_window(todays_note)
+        return(0)
 
 def main(argv=None):
     # Do argv default this way, as doing it in the functional
@@ -91,10 +156,10 @@ def main(argv=None):
     subparsers = parser.add_subparsers(help="Commands")
 
     parser_list = subparsers.add_parser("todos", help="list todos")
-    parser_list.set_defaults(func=list_todos)
+    parser_list.set_defaults(cmd_class=ToDosCmd)
 
     parser_diary = subparsers.add_parser("diary", help="daily diary")
-    parser_diary.set_defaults(func=daily_diary)
+    parser_diary.set_defaults(cmd_class=DiaryCmd)
 
     args = parser.parse_args()
     output_handler.setLevel(args.output_level)
@@ -105,7 +170,11 @@ def main(argv=None):
         output.debug("Parsing configuration file {}".format(args.config))
         config.read(conf_path)
 
-    result = args.func(args, output, config)
+    cmd = args.cmd_class(config=config, logger=output)
+    try:
+        result = cmd.execute(args)
+    except CommandException as e:
+        output.error(str(e))
 
     return(result)
 
