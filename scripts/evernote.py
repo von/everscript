@@ -90,32 +90,42 @@ class ToDosCmd(Command):
         return(0)
 
 class DiaryCmd(Command):
-    def execute(self, args):
-        todays_title = date.today().strftime("%B %d, %Y")
-        diary_notebook = self.config("Diary", "Notebook")
-        if not diary_notebook:
+    def __init__(self, *args, **kwargs):
+        Command.__init__(self, *args, **kwargs)
+        self.title = date.today().strftime("%B %d, %Y")
+        self.notebook = self.config("Diary", "Notebook")
+        if not self.notebook:
             raise MissingConfigurationException("No Diary notebook defined")
-        todays_notes = EverNote.find_notes(todays_title, notebook=diary_notebook)
+
+    def execute(self, args):
+        todays_notes = EverNote.find_notes(self.title,
+                                           notebook=self.notebook)
         if len(todays_notes):
-            self.output("Opening existing diary for {}".format(todays_title))
+            self.output("Opening existing diary for {}".format(self.title))
             todays_note = todays_notes[0]
         else:
-            self.output("Creating new diary for {}".format(todays_title))
-            template_note_title = self.config("Diary", "Template")
-            if template_note_title:
-                self.debug("Using \"{}\" for template.".format(template_note_title ))
-                template_notes = EverNote.find_notes(template_note_title,
-                                                     notebook=diary_notebook)
-                html = template_notes[0].content()
-            else:
-                self.debug("No template in use: " + str(e))
-                html = ""
-            todays_note = EverNote.create_note(with_html=html,
-                                               title=todays_title,
-                                               notebook=diary_notebook)
+            self.output("Creating new diary for {}".format(self.title))
+            template = self.get_template()
+            todays_note = EverNote.create_note(with_html=template,
+                                               title=self.title,
+                                               notebook=self.notebook)
         EverNote.open_note_window(todays_note)
         return(0)
 
+    def get_template(self):
+        template_note_title = self.config("Diary", "Template")
+        template = ""
+        if template_note_title:
+            template_notes = EverNote.find_notes(template_note_title,
+                                                 notebook=self.notebook)
+            if len(template_notes) > 0:
+                # TODO: find exact note
+                self.debug("Using \"{}\" for template.".format(template_note_title ))
+                template = template_notes[0].content()
+        else:
+            self.debug("No template in use: " + str(e))
+        return template
+            
 def main(argv=None):
     # Do argv default this way, as doing it in the functional
     # declaration sets it at compile time.
