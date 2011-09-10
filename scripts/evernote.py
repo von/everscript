@@ -106,7 +106,8 @@ class DiaryCmd(Command):
         else:
             self.output("Creating new diary for {}".format(self.title))
             template = self.get_template()
-            todays_note = EverNote.create_note(with_html=template,
+            html = template.format(todos=self.get_todos_as_html())
+            todays_note = EverNote.create_note(with_html=html,
                                                title=self.title,
                                                notebook=self.notebook)
         EverNote.open_note_window(todays_note)
@@ -126,6 +127,17 @@ class DiaryCmd(Command):
             self.debug("No template in use: " + str(e))
         return template
             
+    def get_todos_as_html(self):
+        """Return list of todos as html"""
+        html ="<ul>\n"
+        todo_notebook = self.config("ToDos", "Notebook")
+        if todo_notebook:
+            todos = ToDos(todo_notebook)
+            for todo in todos:
+                html += "<li>{}</li>\n".format(todo.title())
+        html += "</ul>\n"
+        return html
+
 def main(argv=None):
     # Do argv default this way, as doing it in the functional
     # declaration sets it at compile time.
