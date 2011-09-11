@@ -1,0 +1,314 @@
+﻿
+
+Suite: Type Names [tpnm] -- Other classes and commands
+
+	Event: count [corecnte] -- Return the number of elements of a particular class within an object.
+		<obj > -- The objects to be counted.
+		each [kocl] <type> (optional) -- The class of objects to be counted.
+		Result: <long> -- The count.
+
+
+	Class: item [cobj] -- A scriptable object.
+		class_ [pcls] <type> (r/o) -- The class of the object.
+		properties [pALL] <reco> -- All of the object's properties.
+
+	Class: items [cobj]
+		(plural synonym)
+
+	Class: note [EVnn] -- A note.
+		local_id [ID  ] <ctxt> -- locally unique note ID.
+
+	Class: notes [EVnn]
+		(plural synonym)
+
+	Class: attachment [EVnr] -- A note attachment.  Image, Audio, PDF, etc.
+		local_id [ID  ] <ctxt> -- locally unique attachment ID.
+
+	Class: attachments [EVnr]
+		(plural synonym)
+
+	Class: note_or_list_of_note [cct6] -- note or list of note
+
+	Class: text_or_notebook [cct8] -- text or notebook
+
+	Class: tag_or_list_of_tag [cct\x3a] -- tag or list of tag
+
+	Class: tag_or_missing_value [cct2] -- tag or missing value
+
+	Class: list_of_file_or_specifier [cct0] -- list of file or specifier
+
+	Class: specifier_or_list_of_specifier [cct1] -- specifier or list of specifier
+
+	Class: list_of_text_or_list_of_tag [cct9] -- list of text or list of tag
+
+	Class: notebook_or_text [cct7] -- notebook or text
+
+	Class: text_or_missing_value [cct4] -- text or missing value
+
+	Class: date_or_missing_value [cct3] -- date or missing value
+
+	Class: real_or_missing_value [cct5] -- real or missing value
+
+
+Suite: Standard Suite [\x3f\x3f\x3f\x3f] -- Common classes and commands for all applications.
+
+	Event: close [coreclos] -- Close a window.
+		<obj > -- the window(s) to close.
+		Result: <null> (optional)
+
+	Event: print_ [aevtpdoc] -- Print a document.
+		<cct0> -- The file(s), document(s), or window(s) to be printed.
+		with_properties [prdt] <pset> (optional) -- The print settings to use.
+		print_dialog [pdlg] <bool> (optional) -- Should the application show the print dialog?
+		Result: <null> (optional)
+
+	Event: quit [aevtquit] -- Quit the application.
+		<null> (optional)
+		Result: <null> (optional)
+
+	Event: count [corecnte] -- Return the number of elements of a particular class within an object.
+		<obj > -- The objects to be counted.
+		Result: <long> -- The count.
+
+	Event: delete [coredelo] -- Delete an object.
+		<cct1> -- The object(s) to delete.
+		Result: <null> (optional)
+
+	Event: exists [coredoex] -- Verify that an object exists.
+		<****> -- The object(s) to check.
+		Result: <bool> -- Did the object(s) exist?
+
+	Event: make [corecrel] -- Create a new object.
+		<null> (optional)
+		new [kocl] <type> -- The class of the new object.
+		at [insh] <insl> (optional) -- The location at which to insert the object.
+		with_data [data] <****> (optional) -- The initial contents of the object.
+		with_properties [prdt] <reco> (optional) -- The initial values for properties of the object.
+		Result: <obj > -- The new object.
+
+	Event: move [coremove] -- Move an object to a new location.
+		<obj > -- The object(s) to move.
+		to [insh] <insl> -- The new location for the object(s).
+		Result: <null> (optional)
+
+
+	Class: application [capp] -- The application's top-level scripting object.
+		name [pnam] <ctxt> (r/o) -- The name of the application.
+		frontmost [pisf] <bool> (r/o) -- Is this the active application?
+		version [vers] <ctxt> (r/o) -- The version number of the application.
+		[cwin] --name index relative range test id 
+
+	Class: applications [capp]
+		(plural synonym)
+
+	Class: window [cwin] -- A window.
+		name [pnam] <ctxt> (r/o) -- The title of the window.
+		id [ID  ] <long> (r/o) -- The unique identifier of the window.
+		index [pidx] <long> -- The index of the window, ordered front to back.
+		bounds [pbnd] <qdrt> -- The bounding rectangle of the window.
+		closeable [hclb] <bool> (r/o) -- Does the window have a close button?
+		miniaturizable [ismn] <bool> (r/o) -- Does the window have a minimize button?
+		miniaturized [pmnd] <bool> -- Is the window minimized right now?
+		resizable [prsz] <bool> (r/o) -- Can the window be resized?
+		visible [pvis] <bool> -- Is the window visible right now?
+		zoomable [iszm] <bool> (r/o) -- Does the window have a zoom button?
+		zoomed [pzum] <bool> -- Is the window zoomed right now?
+
+	Class: windows [cwin]
+		(plural synonym)
+
+	Enums: [enum]
+		standard [lwst] -- Standard PostScript error handling
+		detailed [lwdt] -- print a detailed report of PostScript errors
+
+
+Suite: Evernote Suite [EVRN] -- Evernote Application Suite
+
+	Event: synchronize [EVRNsync] -- Synchronize with the Evernote server.  Returns immediately.  Does nothing if a sync is currently in progress.
+		<null> (optional)
+		Result: <null> (optional)
+
+	Event: open_collection_window [EVRNoncw] -- Open a new note collection window.
+		<null> (optional)
+		with_query_string [EV16] <ctxt> (optional) -- Query string for new window.  Default displays all notes.
+		Result: <EVcw> -- The new collection window
+
+	Event: open_note_window [EVRNonwn] -- Open a note window for a specific note.  If the note already is open in a note window, that window is activated and returned, otherwise a new note window is created.
+		<null> (optional)
+		with_ [EV17] <EVnn> -- Note to open.
+		Result: <EVnw> -- The new note window
+
+	Event: find_notes [EVRNfind] -- Search for notes using the Evernote query syntax.
+		<ctxt> -- query string
+		Result: <EVnn> (list) -- Notes matching the query.
+
+	Event: create_notebook [EVRNcrnb] -- Create a new notebook.
+		<ctxt> -- the name for the new notebook
+		with_type [Nbty] <Nbty> (optional, enum) -- Notebook type.  Default is synchronized.
+		Result: <EVnb> -- The new notebook
+
+	Event: export [EVRNenxp] -- Export notes.
+		<EVnn> (list) -- the notes to export.
+		to [kfil] <file> -- File to export into.  The contents of this file will be overwritten.
+		tags [Exit] <bool> (optional) -- Include tags when exporting.  Default is TRUE.
+		format [Expf] <Exff> (optional, enum) -- Format for note export.  Default is ENEX.
+		Result: <null> (optional)
+
+	Event: import_ [EVRNenim] -- Import notes from an xml file.
+		<file> -- the file to import.
+		to [Enim] <cct7> (optional) -- Notebook to import into.  Can be a notebook name or object reference.
+		tags [Exit] <bool> (optional) -- Include tags when importing.  Default is FALSE.
+		Result: <cct6> -- Newly imported notes.
+
+	Event: append [EVRNadtn] -- Append data to an existing note.  You must specify exactly one of 'text', 'html', or 'attachment' parameters.
+		<EVnn> -- The note to modify.
+		text [EV18] <ctxt> (optional) -- Text to append.
+		html [EV19] <ctxt> (optional) -- HTML to append.
+		attachment [EV21] <file> (optional) -- Attachment file to append.
+		Result: <null> (optional)
+
+	Event: write [EVRNerwf] -- Write the attachment data to a file.
+		<EVnr> -- The attachment to write.
+		to [kfil] <file> -- File to write to.  The contents of this file will be overwritten.
+		Result: <null> (optional)
+
+	Event: create_note [EVRNcrnt] -- Create a new note.  You must specify exactly one of 'from file', 'from url', 'with text', or 'with html'.
+		<null> (optional)
+		from_file [kfil] <file> (optional) -- Clip the contents of the specified file.
+		from_url [Ennu] <ctxt> (optional) -- Clip the contents of the specified URL.
+		with_text [Enxt] <ctxt> (optional) -- Create a new note using the specified plain-text as content.
+		with_html [Enhl] <ctxt> (optional) -- Create a new note using the specified html as content.
+		title [Entt] <ctxt> (optional) -- Title for the new note.
+		notebook [Ennb] <cct8> (optional) -- Notebook in which to place the note.  Can be the name of a notebook or an object reference.  If no notebook with the specified name exists a new one is created.  If no notebook is specified, the default notebook for the account is used.
+		tags [Engg] <cct9> (optional) -- Tags to assign to the new note.  Can be the name of a tag or an object reference.  If no tag with the specified name exists a new one is created.
+		attachments [Enaa] <file> (optional, list) -- Files to attach to the note.
+		created [Endt] <ldt > (optional) -- Creation date for the new note.  Defaults to now.
+		Result: <EVnn> -- The new note.
+
+	Event: assign [EVRNassn] -- Assign one or more tags to one or more notes.
+		<cct:> -- One or more tags to assign.
+		to [EV13] <cct6> -- One or more notes to modify.
+		Result: <null> (optional)
+
+	Event: unassign [EVRNunas] -- Un-assign one or more tags from one or more notes.
+		<cct:> -- One or mote tags to unassign.
+		from_ [EV14] <cct6> -- One or more notes to modify.
+		Result: <null> (optional)
+
+
+	Class: account_info [EVai] -- Information about an Evernote account.
+		name [pnam] <ctxt> (r/o) -- The account's username.
+		account_type [EV08] <EVak> (enum, r/o) -- The account type.
+		upload_limit [EV09] <long> (r/o) -- Maximum data upload (in bytes) for the current month.
+		upload_reset_date [EV10] <ldt > (r/o) -- When the data upload counter will be reset.
+		upload_used [EV11] <long> (r/o) -- Data uploaded (in bytes) so far for the current month.
+
+	Class: accounts [EVai]
+		(plural synonym)
+
+	Class: application [capp] -- The application's top-level scripting object.
+		<Inheritance> <capp> -- All of the properties of the superclass.
+		current_account [EV04] <EVai> (r/o) -- Information about the currently-active Evernote account.
+		selection [EV15] <EVnn> (list, r/o) -- The note(s) selected in the front-most window.  Returns empty list if the front-most window is not a collection or note window, or if there is no front-most window.
+		[EVnb] --name index relative range test 
+		[EVtg] --name index relative range test 
+		[cwin] --name index relative range test id 
+		[EVai] --name index relative range test 
+
+	Class: applications [capp]
+		(plural synonym)
+
+	Class: collection_window [EVcw] -- A note collection window.
+		<Inheritance> <cwin> -- All of the properties of the superclass.
+		selection [EV01] <EVnn> (list, r/o) -- Notes that are selected in the window.
+		query_string [EV20] <ctxt> -- The query string used to determine which notes are displayed in the window.  Setting this property causes the window's contents to update to reflect the new query.
+		[EVnn] --index relative range test id 
+
+	Class: collection_windows [EVcw]
+		(plural synonym)
+
+	Class: note_window [EVnw] -- A single-note window.
+		<Inheritance> <cwin> -- All of the properties of the superclass.
+		selection [EV02] <EVnn> (list, r/o) -- The window's single note.
+		[EVnn] --index relative range test id 
+
+	Class: note_windows [EVnw]
+		(plural synonym)
+
+	Class: notebook [EVnb] -- A notebook.
+		name [pnam] <ctxt> -- The notebook's name.
+		notebook_type [EVnt] <Nbty> (enum, r/o) -- The notebook's type.
+		default [EVnd] <bool> (r/o) -- Indicates if this is the 'default' notebook for the account.
+		[EVnn] --index relative range test id 
+
+	Class: notebooks [EVnb]
+		(plural synonym)
+
+	Class: tag [EVtg] -- A tag.
+		name [pnam] <ctxt> -- The tag's name.
+		parent [ENtp] <cct2> -- The tag's parent tag, if any.
+
+	Class: tags [EVtg]
+		(plural synonym)
+
+	Class: note [EVnn] -- A note.
+		title [EVet] <ctxt> -- The note's title.
+		creation_date [EVdd] <ldt > -- The note's creation date.
+		modification_date [EVmm] <ldt > -- The note's last modification date.
+		subject_date [EVsd] <cct3> -- The date associated with the note's content.
+		source_URL [EVsu] <cct4> -- The note's source URL.
+		latitude [EVla] <cct5>
+		longitude [EVlo] <cct5>
+		altitude [EVat] <cct5>
+		ENML_content [EVml] <ctxt> (r/o) -- The note's content in ENML representation.
+		HTML_content [EVhl] <ctxt> -- The note's content in HTML representation.
+		tags [EVtg] <EVtg> (list) -- The tags assigned to this note.
+		notebook [EV22] <EVnb> (r/o) -- The notebook containing this note.
+		[EVnr] --index relative range test id 
+
+	Class: notes [EVnn]
+		(plural synonym)
+
+	Class: attachment [EVnr] -- A note attachment.  Image, Audio, PDF, etc.
+		filename [EVrf] <cct4> -- The attachment's original filename, if available.
+		mime [EVrm] <ctxt> -- The attachment's mime type.
+		size [EVrs] <long> -- The attachment's size in bytes.
+		source_URL [EVsu] <cct4> -- The attachment's source URL.
+		latitude [EVla] <cct5>
+		longitude [EVlo] <cct5>
+		altitude [EVat] <cct5>
+		hash [EVah] <ctxt> (r/o) -- The attachment's hash (used to identify the attachment in the note's ENML).
+		recognition_data [EV23] <cct4> (r/o) -- Recognition data for this resource, if any.  Note that a resource will not have recognition data until it is provided by the service.  This XML data conforms to the following DTD: http://xml.evernote.com/pub/recoIndex.dtd
+
+	Class: attachments [EVnr]
+		(plural synonym)
+
+	Enums: [Nbty]
+		synchronized [priv] -- Default notebook type.  Notes are synchronized to and from the server.
+		published [publ] -- Synchronized notebook that is publicly available.
+		local_only [loco] -- Local only notebook.  Never synchronized with server.  Only available on this client.
+
+	Enums: [Exff]
+		ENEX [enex] -- An XML-based format that preserves the exact note content and all attachments.  Suitable for importing into another Evernote client or 3rd party application.  Use this format for making local backups.
+		HTML [exht] -- Content of each note is converted to HTML.  Attachments are exported as separate files that are linked from the note HTML.
+
+	Enums: [EVak]
+		standard [EV05] -- Standard (free) account type.
+		premium [EV06] -- Premium account type.
+		other [EV07] -- Specialized account type.
+
+
+Suite: Type Definitions [tpdf] -- Records used in scripting Evernote
+
+
+	Class: print_settings [pset]
+		copies [lwcp] <long> -- the number of copies of a document to be printed
+		collating [lwcl] <bool> -- Should printed copies be collated?
+		starting_page [lwfp] <long> -- the first page of the document to be printed
+		ending_page [lwlp] <long> -- the last page of the document to be printed
+		pages_across [lwla] <long> -- number of logical pages laid across a physical page
+		pages_down [lwld] <long> -- number of logical pages laid out down a physical page
+		requested_print_time [lwqt] <ldt > -- the time at which the desktop printer should print the document
+		error_handling [lweh] <enum> (enum) -- how errors are handled
+		fax_number [faxn] <ctxt> -- for fax number
+		target_printer [trpr] <ctxt> -- for target printer
