@@ -1,8 +1,10 @@
-"""Evernote note representing a ToDo"""
+"""Collection of ToDo notes"""
 
-from EverNote import EverNote, Notes
+from . import EverNote, Notes, ToDo
 
 class ToDos(Notes):
+
+    _item_class = ToDo
 
     def __init__(self, notebook, search_term=""):
         self.notebook = notebook
