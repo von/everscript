@@ -6,6 +6,9 @@ from Note import Note
 
 class Notes(object):
 
+    # class representing our individual notes
+    _item_class = Note
+
     def __init__(self, notes):
         self.notes = notes
 
@@ -18,6 +21,6 @@ class Notes(object):
             args.append(i.stop)
             if i.step:
                 args.append(i.step)
-            return Notes(getitem(self.notes, *args))
+            return self.__class__(getitem(self.notes, *args))
         else:
-            return Note(getitem(self.notes, i))
+            return self._item_class(getitem(self.notes, i))
