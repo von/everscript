@@ -24,3 +24,9 @@ class Notes(object):
             return self.__class__(getitem(self.notes, *args))
         else:
             return self._item_class(getitem(self.notes, i))
+
+    def append(self, note):
+        """Append a note to list.
+
+        note must be a Note instance."""
+        self.notes.append(note.note)
