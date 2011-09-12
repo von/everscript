@@ -20,6 +20,21 @@ class ToDo(Note):
         today = datetime.date.today()
         return (today == due_date)
 
+    def due_soon(self, days):
+        """Is task due in the defined future?
+
+        Returns False if task is past due or due today.
+        Returns None if task has no due date."""
+        due_date = self.due_date()
+        if due_date is None:
+            return None
+        soon = datetime.timedelta(days)
+        day = datetime.timedelta(1)
+        today = datetime.date.today()
+        due_delta = due_date - today
+        return ((due_delta >= day) and (due_delta <= soon))
+
+        return 
     def due_date(self):
         """Return this note's due date as datetime.date"""
         match = self.DUE_REGEX.search(self.title())
