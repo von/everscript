@@ -10,6 +10,16 @@ class ToDo(Note):
 
     DUE_REGEX = re.compile("due:\s?(\d\d?/\d\d?(/\d\d\d?\d?)?)",re.IGNORECASE)
 
+    def due_today(self):
+        """Return True if note is due today.
+
+        Return False if not due today, None if note has no due date."""
+        due_date = self.due_date()
+        if due_date is None:
+            return None
+        today = datetime.date.today()
+        return (today == due_date)
+
     def due_date(self):
         """Return this note's due date as datetime.date"""
         match = self.DUE_REGEX.search(self.title())
