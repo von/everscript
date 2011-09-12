@@ -85,8 +85,21 @@ class ToDosCmd(Command):
         if not todo_notebook:
             raise MissingConfigurationException("No ToDos notebook defined")
         todos = ToDos(todo_notebook)
+        due_today = ToDos()
         for todo in todos:
-            self.output(todo.title())
+            if todo.due_today():
+                due_today.append(todo)
+        if len(due_today):
+            self.output("Due Today:")
+            for todo in due_today:
+                self.output(todo.title())
+            self.output("")
+        for todo in todos:
+            s = todo.title()
+            due = todo.due_date()
+            if due:
+                s += " Due: " + due.strftime("%B %d, %Y")
+            self.output(s)
         return(0)
 
 class DiaryCmd(Command):
