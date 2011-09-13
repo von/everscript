@@ -80,26 +80,38 @@ class MissingConfigurationException(CommandException):
 # Commands
 
 class ToDosCmd(Command):
+    # Flags for types of todos based on due date
+    PAST_DUE = 0x01
+    DUE_TODAY = 0x02
+    DUE_SOON = 0x04
+    DUE_LATER = 0x08
+    NO_DUE_DATE = 0x10
+
     def execute(self, args):
         todo_notebook = self.config("ToDos", "Notebook")
         if not todo_notebook:
             raise MissingConfigurationException("No ToDos notebook defined")
         todos = ToDos(todo_notebook)
-        due_today = ToDos()
-        for todo in todos:
-            if todo.due_today():
-                due_today.append(todo)
-        if len(due_today):
-            self.output("Due Today:")
-            for todo in due_today:
-                self.output(todo.title())
-            self.output("")
-        for todo in todos:
-            s = todo.title()
-            due = todo.due_date()
-            if due:
-                s += " Due: " + due.strftime("%B %d, %Y")
-            self.output(s)
+        past_due, due_today, due_soon, due_later, not_due = todos.bin_by_due_date()
+        if args.show_flags == []:
+            lists = [ past_due, due_today, due_soon, due_later, not_due ]
+        else:
+            lists = []
+            for flag in args.show_flags:
+                if flag == self.PAST_DUE:
+                    lists.append(past_due)
+                elif flag == self.DUE_TODAY:
+                    lists.append(due_today)
+                elif flag == self.DUE_SOON:
+                    lists.append(due_soon)
+                elif flag == self.DUE_LATER:
+                    lists.append(due_later)
+                elif flag == self.NO_DUE_DATE:
+                    lists.append(not_due)
+        for list in lists:
+            if len(list) > 0:
+                for todo in list:
+                    self.output(todo.title())
         return(0)
 
 class DiaryCmd(Command):
@@ -190,8 +202,24 @@ def main(argv=None):
 
     subparsers = parser.add_subparsers(help="Commands")
 
-    parser_list = subparsers.add_parser("todos", help="list todos")
-    parser_list.set_defaults(cmd_class=ToDosCmd)
+    parser_todos = subparsers.add_parser("todos", help="list todos")
+    parser_todos.set_defaults(cmd_class=ToDosCmd,
+                             show_flags=[])
+    parser_todos.add_argument("--past",
+                              help="Show ToDos past due",
+                              dest="show_flags",
+                              action="append_const",
+                              const=ToDosCmd.PAST_DUE)
+    parser_todos.add_argument("--today",
+                              help="Show ToDos due today",
+                              dest="show_flags",
+                              action="append_const",
+                              const=ToDosCmd.DUE_TODAY)
+    parser_todos.add_argument("--soon",
+                              help="Show ToDos due soon",
+                              dest="show_flags",
+                              action="append_const",
+                              const=ToDosCmd.DUE_SOON)
 
     parser_diary = subparsers.add_parser("diary", help="daily diary")
     parser_diary.set_defaults(cmd_class=DiaryCmd)
