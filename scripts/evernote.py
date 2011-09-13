@@ -71,6 +71,16 @@ class Command(object):
         """Execute the command with given args namespace"""
         return
 
+    @abc.abstractmethod
+    #@classmethod
+    def add_subparser(cls, subparsers):
+        """Add this command's subparser to the given argparser.
+
+        subparsers should be the action returned from ArgumentParser.add_subparsers()
+        Returns nothing.
+        """
+        return
+
 class CommandException(Exception):
     """Exception in command"""
     pass
@@ -117,6 +127,32 @@ class ToDosCmd(Command):
                 for todo in list:
                     self.output(todo.title())
         return(0)
+
+    @classmethod
+    def add_subparser(cls, subparsers):
+        """Add this command's subparser to the given argparser.
+
+        subparsers should be the action returned from ArgumentParser.add_subparsers()
+        Returns nothing.
+        """
+        parser = subparsers.add_parser("todos", help="list todos")
+        parser.set_defaults(cmd_class=cls,
+                            show_flags=[])
+        parser.add_argument("--past",
+                            help="Show ToDos past due",
+                            dest="show_flags",
+                            action="append_const",
+                            const=cls.PAST_DUE)
+        parser.add_argument("--today",
+                            help="Show ToDos due today",
+                            dest="show_flags",
+                            action="append_const",
+                            const=cls.DUE_TODAY)
+        parser.add_argument("--soon",
+                            help="Show ToDos due soon",
+                            dest="show_flags",
+                            action="append_const",
+                            const=cls.DUE_SOON)
 
 class DiaryCmd(Command):
     def __init__(self, *args, **kwargs):
@@ -167,6 +203,16 @@ class DiaryCmd(Command):
         html += "</ul>\n"
         return html
 
+    @classmethod
+    def add_subparser(cls, subparsers):
+        """Add this command's subparser to the given argparser.
+
+        subparsers should be the action returned from ArgumentParser.add_subparsers()
+        Returns nothing.
+        """
+        parser = subparsers.add_parser("diary", help="daily diary")
+        parser.set_defaults(cmd_class=cls)
+
 def main(argv=None):
     # Do argv default this way, as doing it in the functional
     # declaration sets it at compile time.
@@ -206,27 +252,8 @@ def main(argv=None):
 
     subparsers = parser.add_subparsers(help="Commands")
 
-    parser_todos = subparsers.add_parser("todos", help="list todos")
-    parser_todos.set_defaults(cmd_class=ToDosCmd,
-                             show_flags=[])
-    parser_todos.add_argument("--past",
-                              help="Show ToDos past due",
-                              dest="show_flags",
-                              action="append_const",
-                              const=ToDosCmd.PAST_DUE)
-    parser_todos.add_argument("--today",
-                              help="Show ToDos due today",
-                              dest="show_flags",
-                              action="append_const",
-                              const=ToDosCmd.DUE_TODAY)
-    parser_todos.add_argument("--soon",
-                              help="Show ToDos due soon",
-                              dest="show_flags",
-                              action="append_const",
-                              const=ToDosCmd.DUE_SOON)
-
-    parser_diary = subparsers.add_parser("diary", help="daily diary")
-    parser_diary.set_defaults(cmd_class=DiaryCmd)
+    for cmd in Command.__subclasses__():
+        cmd.add_subparser(subparsers)
 
     args = parser.parse_args()
     output_handler.setLevel(args.output_level)
