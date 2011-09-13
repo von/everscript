@@ -10,6 +10,7 @@ Notebook=Diary
 [ToDos]
 Notebook=2.Next Action
 """
+import abc
 from appscript import app
 import argparse
 import ConfigParser
@@ -22,8 +23,10 @@ from everscript import EverNote, ToDos
 
 ######################################################################
 
-class Command:
+class Command(object):
     """Base class for commands"""
+    __metaclass__ = abc.ABCMeta
+
     logger = None
     conf = None
 
@@ -63,9 +66,10 @@ class Command:
         if self.logger:
             self.logger.debug(msg)
 
+    @abc.abstractmethod
     def execute(self, args):
         """Execute the command with given args namespace"""
-        raise NotImplementedError()
+        return
 
 class CommandException(Exception):
     """Exception in command"""
