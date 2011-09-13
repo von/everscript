@@ -22,6 +22,8 @@ import sys
 from everscript import EverNote, ToDos
 
 ######################################################################
+#
+# Command abstract base class
 
 class Command(object):
     """Base class for commands"""
@@ -154,6 +156,8 @@ class ToDosCmd(Command):
                             action="append_const",
                             const=cls.DUE_SOON)
 
+######################################################################
+
 class DiaryCmd(Command):
     def __init__(self, *args, **kwargs):
         Command.__init__(self, *args, **kwargs)
@@ -212,6 +216,10 @@ class DiaryCmd(Command):
         """
         parser = subparsers.add_parser("diary", help="daily diary")
         parser.set_defaults(cmd_class=cls)
+
+######################################################################
+#
+# main()
 
 def main(argv=None):
     # Do argv default this way, as doing it in the functional
