@@ -198,12 +198,28 @@ class DiaryCmd(Command):
             
     def get_todos_as_html(self):
         """Return list of todos as html"""
-        html ="<ul>\n"
+        html =""
         todo_notebook = self.config("ToDos", "Notebook")
         if todo_notebook:
             todos = ToDos(todo_notebook)
-            for todo in todos:
-                html += "<li>{}</li>\n".format(todo.title())
+            (past_due, due_today, due_soon,
+             due_later, not_due) = todos.bin_by_due_date()
+            if len(past_due):
+                html += "<b>Past due:</b>\n"
+                html += self.todos_to_html(past_due)
+            if len(due_today):
+                html += "<b>Due today:</b>\n"
+                html += self.todos_to_html(due_today)
+            if len(due_soon):
+                html += "<b>Due soon:</b>\n"
+                html += self.todos_to_html(due_soon)
+        return html
+
+    def todos_to_html(self, todos):
+        """Covert a ToDos instance to a hunk of HTML."""
+        html = "<ul>\n"
+        for todo in todos:
+            html += "<li>{}</li>\n".format(todo.title())
         html += "</ul>\n"
         return html
 
