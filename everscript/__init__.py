@@ -1,3 +1,4 @@
+from constants import *
 from EverNote import EverNote
 from Note import Note
 from Notes import Notes
