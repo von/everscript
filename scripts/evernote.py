@@ -13,9 +13,12 @@ Notebook=2.Next Action
 import abc
 from appscript import app
 import argparse
+import collections
 import ConfigParser
 from datetime import date
 import logging
+import re
+import subprocess
 import os.path
 import sys
 
@@ -158,6 +161,9 @@ class ToDosCmd(Command):
 
 ######################################################################
 
+# Event as returned from DiaryCmd.get_events()
+Event = collections.namedtuple("Event", ["title", "location", "time"])
+
 class DiaryCmd(Command):
     def __init__(self, *args, **kwargs):
         Command.__init__(self, *args, **kwargs)
@@ -175,7 +181,8 @@ class DiaryCmd(Command):
         else:
             self.output("Creating new diary for {}".format(self.title))
             template = self.get_template()
-            html = template.format(todos=self.get_todos_as_html())
+            html = template.format(events=self.get_events_as_html(),
+                                   todos=self.get_todos_as_html())
             todays_note = EverNote.create_note(with_html=html,
                                                title=self.title,
                                                notebook=self.notebook)
@@ -222,6 +229,59 @@ class DiaryCmd(Command):
             html += "<li>{}</li>\n".format(todo.title())
         html += "</ul>\n"
         return html
+
+    def get_events_as_html(self):
+        """Return list of today's events as html"""
+        return self.events_to_html(self.get_events())
+
+    def events_to_html(self, events):
+        """Convert a list of Events to a hunk of HTML."""
+        html = "<ul>\n"
+        for event in events:
+            html += "<li>{} {}".format(event.time, event.title)
+            if event.location != "":
+                html += "<ul><li>{}</li></ul>".format(event.location)
+            html += "</li>\n"
+        html += "</ul>\n"
+        return html
+
+    def get_events(self):
+        """Return list of Event objects representing today's events
+
+        Requires icalBuddy to be installed in PATH."""
+        self.debug("Getting today's events...")
+        icalBuddy = "icalBuddy"
+        cmd = [icalBuddy]
+        # Set item prefix
+        cmd.extend(["-b", "* "])
+        cmd.extend(["-nc"])
+        # Fields to display, in order
+        fields = "title,datetime,location"
+        cmd.extend(["-iep", fields])
+        cmd.extend(["-po", fields])
+        cmd.append("eventsToday")
+        try:
+            out = subprocess.check_output(cmd)
+        except OSError as e:
+            self.debug("Error executing {}: {}".format(icalBuddy,
+                                                       str(e)))
+            return []
+        raw_events = re.split("^\* ", out, flags=re.M)
+        events = []
+        for raw_event in raw_events:
+            # Skip empty events
+            if re.match(raw_event, "\s*$"):
+                continue
+            title_match = re.match("(.*)", raw_event, flags=re.M)
+            title = title_match.group(1) if title_match else ""
+            time_match = re.search("(\d+:\d+ .M - \d+:\d+ .M)",
+                                   raw_event, flags=re.M)
+            time = time_match.group(1) if time_match else ""
+            location_match = re.search("location: (.*)",
+                                       raw_event, flags=re.M)
+            location = location_match.group(1) if location_match else ""
+            events.append(Event(title, location, time))
+        return events
 
     @classmethod
     def add_subparser(cls, subparsers):
