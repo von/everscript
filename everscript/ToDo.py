@@ -8,7 +8,7 @@ from . import Note
 class ToDo(Note):
     """Evernote note representing a ToDo"""
 
-    DUE_REGEX = re.compile("due:\s?(\d\d?/\d\d?(/\d\d\d?\d?)?)",re.IGNORECASE)
+    DUE_REGEX = re.compile("due:\s?(\d\d?/\d\d?(/\d\d\d?\d?)?)", re.IGNORECASE)
 
     def due_today(self):
         """Return True if note is due today.
@@ -35,6 +35,7 @@ class ToDo(Note):
         return ((due_delta >= day) and (due_delta <= soon))
 
         return 
+
     def due_date(self):
         """Return this note's due date as datetime.date"""
         match = self.DUE_REGEX.search(self.title())
