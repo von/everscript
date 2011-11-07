@@ -211,12 +211,16 @@ class DiaryCmd(Command):
             todos = ToDos(todo_notebook)
             (past_due, due_today, due_soon,
              due_later, not_due) = todos.bin_by_due_date()
+            due_asap = filter(lambda todo: todo.due_asap(), todos)
             if len(past_due):
                 html += "<b>Past due:</b>\n"
                 html += self.todos_to_html(past_due)
             if len(due_today):
                 html += "<b>Due today:</b>\n"
                 html += self.todos_to_html(due_today)
+            if len(due_asap):
+                html += "<b>Due ASAP:</b>\n"
+                html += self.todos_to_html(due_asap)
             if len(due_soon):
                 html += "<b>Due soon:</b>\n"
                 html += self.todos_to_html(due_soon)
