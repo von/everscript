@@ -10,6 +10,8 @@ class ToDo(Note):
 
     DUE_REGEX = re.compile("due:\s?(\d\d?/\d\d?(/\d\d\d?\d?)?)", re.IGNORECASE)
 
+    DUE_ASAP_REGEX = re.compile("\s+ASAP$", re.IGNORECASE)
+
     def due_today(self):
         """Return True if note is due today.
 
@@ -19,6 +21,11 @@ class ToDo(Note):
             return None
         today = datetime.date.today()
         return (today == due_date)
+
+    def due_asap(self):
+        """Is task marked as due ASAP?"""
+        match = self.DUE_ASAP_REGEX.search(self.title())
+        return match is not None
 
     def due_soon(self, days):
         """Is task due in the defined future?
