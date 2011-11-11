@@ -43,6 +43,27 @@ class ToDo(Note):
 
         return 
 
+    def due_later(self, days):
+        """Is task due past the defined future?
+
+        Returns False if task is due more than or equal to days in the future.
+        Returns None if task has no due date."""
+        due_date = self.due_date()
+        if due_date is None:
+            return None
+        later = datetime.timedelta(days) + datetime.date.today()
+        return (due_date >= later)
+
+    def past_due(self):
+        """Return True if note is past due.
+
+        Return True if past due, None if note has no due date, False otherwise."""
+        due_date = self.due_date()
+        if due_date is None:
+            return None
+        today = datetime.date.today()
+        return (today > due_date)
+
     def due_date(self):
         """Return this note's due date as datetime.date"""
         match = self.DUE_REGEX.search(self.title())
