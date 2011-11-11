@@ -30,3 +30,10 @@ class Notes(object):
 
         note must be a Note instance."""
         self.notes.append(note.note)
+
+    def extend(self, notes):
+        """Extend a list of notes with another list of notes.
+
+        notes must be a Notes instance."""
+        self.notes.extend(notes.notes)
+
