@@ -10,6 +10,7 @@ Notebook=Diary
 [ToDos]
 NextAction=2.Next Action
 Pending=3.Pending
+Scheduled=2a.Scheduled
 """
 import abc
 from appscript import app
@@ -211,16 +212,20 @@ class DiaryCmd(Command):
         next_action_todos = ToDos(next_action_notebook)
         pending_notebook = self.config("ToDos", "Pending")
         pending_todos = ToDos(pending_notebook)
+        scheduled_notebook = self.config("ToDos", "Scheduled")
+        scheduled_todos = ToDos(scheduled_notebook)
 
         html =""
         html += "<b>Past due:</b>\n"
         html += self.todos_to_html(next_action_todos.past_due())
+        html += self.todos_to_html(scheduled_todos.past_due())
 
         html += "<b>Pending past due:</b>\n"
         html += self.todos_to_html(pending_todos.past_due())
 
         html += "<b>Due today:</b>\n"
         html += self.todos_to_html(next_action_todos.due_today())
+        html += self.todos_to_html(scheduled_todos.due_today())
 
         html += "<b>Pending due today:</b>\n"
         html += self.todos_to_html(pending_todos.due_today())
