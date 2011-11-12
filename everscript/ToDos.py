@@ -16,29 +16,37 @@ class ToDos(Notes):
         else:
             notes = []
         Notes.__init__(self, notes)
+    
+    def due_today(self):
+        """Return Todos with subset of todos due today."""
+        return self.filter(lambda t: t.due_today())
 
-    def bin_by_due_date(self, soon_days=7):
-        """Return separate ToDos sorted by due date.
-
-        Returns tuple of ToDos: past due, due today, due soon, due later, not due.
-        soon defines soon by number of days."""
-        soon = datetime.timedelta(soon_days)
+    def past_due(self):
+        """Return Todos with subset of todos due prior to tody."""
         today = datetime.date.today()
-        past_due = ToDos()
-        due_today = ToDos()
-        due_soon = ToDos()
-        due_later = ToDos()
-        not_due = ToDos()
+        return self.filter(lambda t: t.past_due())
+
+    def due_asap(self):
+        """Returns Todos with subset of todos due ASAP."""
+        return self.filter(lambda t: t.due_asap())
+
+    def without_due_date(self):
+        """Return Todos with subset of todos without due date."""
+        return self.filter(lambda t: t.due_date() is None)
+
+    def due_soon(self, soon_days=7):
+        """Return Todos with subset of todos due in next soon_days days."""
+        return self.filter(lambda t: t.due_soon(soon_days))
+
+    def due_later(self, later_days=8):
+        """Return Todos with subset of todos due later_days or more from today."""
+        later = datetime.date.today() + datetime.timedelta(later_days)
+        return self.filter(lambda t: t.due_later(later_days))
+
+    def filter(self, filter_function):
+        """Return Todos with subset of tods that evaluate to True with filter_function."""
+        todos = ToDos()
         for todo in self:
-            due_date = todo.due_date()
-            if due_date is None:
-                not_due.append(todo)
-            elif due_date < today:
-                past_due.append(todo)
-            elif due_date == today:
-                due_today.append(todo)
-            elif due_date - today <= soon:
-                due_soon.append(todo)
-            else:
-                due_later.append(todo)
-        return past_due, due_today, due_soon, due_later, not_due
+            if filter_function(todo):
+                todos.append(todo)
+        return todos
