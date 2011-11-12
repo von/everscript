@@ -8,7 +8,8 @@ the following format:
 Notebook=Diary
 
 [ToDos]
-Notebook=2.Next Action
+NextAction=2.Next Action
+Pending=3.Pending
 """
 import abc
 from appscript import app
@@ -107,7 +108,7 @@ class ToDosCmd(Command):
     NO_DUE_DATE = 0x10
 
     def execute(self, args):
-        todo_notebook = self.config("ToDos", "Notebook")
+        todo_notebook = self.config("ToDos", "NextAction")
         if not todo_notebook:
             raise MissingConfigurationException("No ToDos notebook defined")
         todos = ToDos(todo_notebook)
@@ -205,25 +206,37 @@ class DiaryCmd(Command):
             
     def get_todos_as_html(self):
         """Return list of todos as html"""
+
+        next_action_notebook = self.config("ToDos", "NextAction")
+        next_action_todos = ToDos(next_action_notebook)
+        pending_notebook = self.config("ToDos", "Pending")
+        pending_todos = ToDos(pending_notebook)
+
         html =""
-        todo_notebook = self.config("ToDos", "Notebook")
-        if todo_notebook:
-            todos = ToDos(todo_notebook)
-            (past_due, due_today, due_soon,
-             due_later, not_due) = todos.bin_by_due_date()
-            due_asap = filter(lambda todo: todo.due_asap(), todos)
-            if len(past_due):
-                html += "<b>Past due:</b>\n"
-                html += self.todos_to_html(past_due)
-            if len(due_today):
-                html += "<b>Due today:</b>\n"
-                html += self.todos_to_html(due_today)
-            if len(due_asap):
-                html += "<b>Due ASAP:</b>\n"
-                html += self.todos_to_html(due_asap)
-            if len(due_soon):
-                html += "<b>Due soon:</b>\n"
-                html += self.todos_to_html(due_soon)
+        html += "<b>Past due:</b>\n"
+        html += self.todos_to_html(next_action_todos.past_due())
+
+        html += "<b>Pending past due:</b>\n"
+        html += self.todos_to_html(pending_todos.past_due())
+
+        html += "<b>Due today:</b>\n"
+        html += self.todos_to_html(next_action_todos.due_today())
+
+        html += "<b>Pending due today:</b>\n"
+        html += self.todos_to_html(pending_todos.due_today())
+
+        html += "<b>Due ASAP:</b>\n"
+        html += self.todos_to_html(next_action_todos.due_asap())
+
+        html += "<b>Pending due ASAP:</b>\n"
+        html += self.todos_to_html(pending_todos.due_asap())
+ 
+        html += "<b>Due soon:</b>\n"
+        html += self.todos_to_html(next_action_todos.due_soon())
+
+        html += "<b>Pending due soon:</b>\n"
+        html += self.todos_to_html(pending_todos.due_soon())
+
         return html
 
     def todos_to_html(self, todos):
