@@ -6,6 +6,7 @@ the following format:
 
 [Diary]
 Notebook=Diary
+Template=Diary-Template
 
 [ToDos]
 NextAction=2.Next Action
