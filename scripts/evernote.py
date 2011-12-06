@@ -210,11 +210,29 @@ class DiaryCmd(Command):
         """Return list of todos as html"""
 
         next_action_notebook = self.config("ToDos", "NextAction")
-        next_action_todos = ToDos(next_action_notebook)
+        if next_action_notebook is None:
+            self.debug("No Next Action notebook defined")
+            next_action_todos = ToDos()
+        else:
+            self.debug("Next Action notebook is {}".format(next_action_notebook))
+            next_action_todos = ToDos(next_action_notebook)
+            self.debug("Read {} Next Action ToDos".format(len(next_action_todos)))
+
         pending_notebook = self.config("ToDos", "Pending")
-        pending_todos = ToDos(pending_notebook)
+        if pending_notebook is None:
+            self.debug("No Pending Todos notebook defined")
+            pending_todos = ToDos()
+        else:
+            pending_todos = ToDos(pending_notebook)
+            self.debug("Read {} Pending ToDos".format(len(pending_todos)))
+
         scheduled_notebook = self.config("ToDos", "Scheduled")
-        scheduled_todos = ToDos(scheduled_notebook)
+        if scheduled_notebook is None:
+            self.debug("No Scheduled notebook defined")
+            scheduled_todos = ToDos()
+        else:
+            scheduled_todos = ToDos(scheduled_notebook)
+            self.debug("Read {} Scheduled ToDos".format(len(scheduled_todos)))
 
         html =""
         html += "<b>Past due:</b>\n"
