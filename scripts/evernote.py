@@ -176,11 +176,17 @@ class DiaryCmd(Command):
             raise MissingConfigurationException("No Diary notebook defined")
 
     def execute(self, args):
-        todays_notes = EverNote.find_notes(self.title,
-                                           notebook=self.notebook)
+        self.debug("Today's date is \"{}\" - searching for existing diary".format(self.title))
+        try:
+            todays_notes = EverNote.find_notes("intitle:" + self.title,
+                                               notebook=self.notebook)
+        except EverNoteException as e:
+            self.output("Error trying to find today's diary: " + str(e))
+            raise
         if len(todays_notes):
-            self.output("Opening existing diary for {}".format(self.title))
             todays_note = todays_notes[0]
+            self.output(
+                "Opening existing diary: {}".format(todays_note.title()))
         else:
             self.output("Creating new diary for {}".format(self.title))
             template = self.get_template()
