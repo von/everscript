@@ -16,6 +16,7 @@ Scheduled=2a.Scheduled
 import abc
 from appscript import app
 import argparse
+import cgi
 import collections
 import ConfigParser
 from datetime import date
@@ -273,7 +274,7 @@ class DiaryCmd(Command):
         """Covert a ToDos instance to a hunk of HTML."""
         html = "<ul>\n"
         for todo in todos:
-            html += "<li>{}</li>\n".format(todo.title())
+            html += "<li>{}</li>\n".format(cgi.escape(todo.title()))
         html += "</ul>\n"
         return html
 
@@ -285,9 +286,11 @@ class DiaryCmd(Command):
         """Convert a list of Events to a hunk of HTML."""
         html = "<ul>\n"
         for event in events:
-            html += "<li>{} {}".format(event.time, event.title)
+            html += "<li>{} {}".format(cgi.escape(event.time),
+                                       cgi.escape(event.title))
             if event.location != "":
-                html += "<ul><li>{}</li></ul>".format(event.location)
+                html += "<ul><li>{}</li></ul>".format(
+                    cgi.escape(event.location))
             html += "</li>\n"
         html += "</ul>\n"
         return html
