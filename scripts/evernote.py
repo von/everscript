@@ -323,12 +323,14 @@ class DiaryCmd(Command):
         cmd.extend(["-iep", fields])
         cmd.extend(["-po", fields])
         cmd.append("eventsToday")
+        self.debug("Executing: " + " ".join(cmd))
         try:
             out = subprocess.check_output(cmd)
         except OSError as e:
             self.debug("Error executing {}: {}".format(icalBuddy,
                                                        str(e)))
             return []
+        self.debug("Raw icalBuddy output:\n" + out)
         raw_events = re.split("^\* ", out, flags=re.M)
         events = []
         for raw_event in raw_events:
@@ -343,6 +345,8 @@ class DiaryCmd(Command):
             location_match = re.search("location: (.*)",
                                        raw_event, flags=re.M)
             location = location_match.group(1) if location_match else ""
+            self.debug("Event found: \"{}\" time: {} location: {}".format(
+                    title, time, location))
             events.append(Event(title, location, time))
         return events
 
