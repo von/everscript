@@ -282,7 +282,12 @@ class DiaryCmd(Command):
         """Covert a ToDos instance to a hunk of HTML."""
         html = "<ul>\n"
         for todo in todos:
-            html += "<li>{}</li>\n".format(cgi.escape(todo.title()))
+            try:
+                html += "<li>{}</li>\n".format(cgi.escape(todo.title()))
+            except Exception as e:
+                self.output(
+                    "Error encoding todo: \"{}\" : {}".format(
+                        todo.title(), str(e)))
         html += "</ul>\n"
         return html
 
