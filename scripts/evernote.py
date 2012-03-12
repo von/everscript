@@ -26,7 +26,7 @@ import subprocess
 import os.path
 import sys
 
-from everscript import EverNote, ToDos
+from everscript import EverNote, EverNoteException, ToDos
 
 ######################################################################
 #
@@ -193,9 +193,13 @@ class DiaryCmd(Command):
             template = self.get_template()
             html = template.format(events=self.get_events_as_html(),
                                    todos=self.get_todos_as_html())
-            todays_note = EverNote.create_note(with_html=html,
-                                               title=self.title,
-                                               notebook=self.notebook)
+            try:
+                todays_note = EverNote.create_note(with_html=html,
+                                                   title=self.title,
+                                                   notebook=self.notebook)
+            except EverNoteException as e:
+                raise CommandException(
+                    "Error creating today's diary: " + str(e))
         EverNote.open_note_window(todays_note)
         return(0)
 
@@ -203,8 +207,12 @@ class DiaryCmd(Command):
         template_note_title = self.config("Diary", "Template")
         template = ""
         if template_note_title:
-            template_notes = EverNote.find_notes(template_note_title,
-                                                 notebook=self.notebook)
+            try:
+                template_notes = EverNote.find_notes(template_note_title,
+                                                     notebook=self.notebook)
+            except EverNoteException as e:
+                self.output("Error finding diary tempalte: " + str(e))
+                raise
             if len(template_notes) > 0:
                 # TODO: find exact note
                 self.debug("Using \"{}\" for template.".format(template_note_title ))
