@@ -416,6 +416,7 @@ def main(argv=None):
         result = cmd.execute(args)
     except CommandException as e:
         output.error(str(e))
+        result = 1
 
     return(result)
 
