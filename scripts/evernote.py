@@ -316,11 +316,12 @@ class DiaryCmd(Command):
 
         Requires icalBuddy to be installed in PATH."""
         self.debug("Getting today's events...")
+
         icalBuddy = "icalBuddy"
         cmd = [icalBuddy]
-        # Set item prefix
-        cmd.extend(["-b", "* "])
-        cmd.extend(["-nc"])
+        cmd.extend(["-b", "* "])  # Event prefix
+        cmd.extend(["-nc"])  # No calendar titles
+
         # Fields to display, in order
         fields = "title,datetime,location"
         cmd.extend(["-iep", fields])
@@ -341,6 +342,7 @@ class DiaryCmd(Command):
             return []
         self.debug("Raw icalBuddy output:\n" + out)
         raw_events = re.split("^\* ", out, flags=re.M)
+
         events = []
         for raw_event in raw_events:
             # Skip empty events
