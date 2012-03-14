@@ -44,6 +44,22 @@ class EverNote(object):
         return Notes(notes)
 
     @classmethod
+    def find_note_by_title(cls, title, notebook=None):
+        """Find note with given title. Returns Note object.
+
+        If notebook is not None, scope search to given notebook."""
+        search_term="intitle:\"" + title + "\""
+        if notebook:
+            search_term += " notebook:\"{}\"".format(notebook)
+        with AppCallContextManager():
+            notes = cls.__get_app().find_notes(search_term)
+        if notes and len(notes) > 0:
+            note = Note(notes[0])
+        else:
+            note = None
+        return note
+
+    @classmethod
     def open_collection_window(cls, query_string=None):
         """Open a collection window"""
         # TODO: handle other arguments besides query_string
