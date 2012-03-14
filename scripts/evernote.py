@@ -179,13 +179,12 @@ class DiaryCmd(Command):
     def execute(self, args):
         self.debug("Today's date is \"{}\" - searching for existing diary".format(self.title))
         try:
-            todays_notes = EverNote.find_notes("intitle:" + self.title,
-                                               notebook=self.notebook)
+            todays_note = EverNote.find_note_by_title(self.title,
+                                                       notebook=self.notebook)
         except EverNoteException as e:
             self.output("Error trying to find today's diary: " + str(e))
             raise
-        if len(todays_notes):
-            todays_note = todays_notes[0]
+        if todays_note:
             self.output(
                 "Opening existing diary: {}".format(todays_note.title()))
         else:
