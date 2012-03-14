@@ -12,6 +12,10 @@ Template=Diary-Template
 NextAction=2.Next Action
 Pending=3.Pending
 Scheduled=2a.Scheduled
+
+[iCal]
+# Calendars to filter on for events (can use UIDs)
+Calendars=Calendar,Informational,Personal,3F0B97F7-0B88-48E3-BDAB-977382767D28
 """
 import abc
 from appscript import app
@@ -321,6 +325,12 @@ class DiaryCmd(Command):
         fields = "title,datetime,location"
         cmd.extend(["-iep", fields])
         cmd.extend(["-po", fields])
+
+        calendars = self.config("iCal", "Calendars")
+        if calendars:
+            self.debug("Filtering on calendars: " + calendars)
+            cmd.extend(["-ic", calendars])
+
         cmd.append("eventsToday")
         self.debug("Executing: " + " ".join(cmd))
         try:
