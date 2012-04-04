@@ -1,4 +1,4 @@
-""""Evernote note representing a ToDo"""
+"""Evernote note representing a ToDo"""
 
 import datetime
 import re
