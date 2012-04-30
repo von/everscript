@@ -21,7 +21,6 @@ import abc
 from appscript import app
 import argparse
 import cgi
-import collections
 import ConfigParser
 from datetime import date
 import logging
@@ -170,8 +169,27 @@ class ToDosCmd(Command):
 ######################################################################
 
 # Event as returned from DiaryCmd.get_events()
-Event = collections.namedtuple("Event", ["title", "location", "time"])
+class Event(object):
+    def __init__(self, title, location, time,
+                 url=None, phone=None, note=None):
+        self.title = title
+        self.location = location
+        self.time = time
+        self.url = url
+        self.phone = phone
+        self.note = note
 
+    def __str__(self):
+        s = "\"{}\"".format(self.title)
+        s += " time: " + self.time
+        s += " location:" + self.location
+        s += " url:" + self.url if self.url else ""
+        s += " phone:" + self.phone if self.phone else ""
+        s += " note:" + self.note if self.note else ""
+        return s
+    
+######################################################################
+        
 class DiaryCmd(Command):
     def __init__(self, *args, **kwargs):
         Command.__init__(self, *args, **kwargs)
@@ -304,10 +322,16 @@ class DiaryCmd(Command):
         for event in events:
             html += "<li>{} {}".format(cgi.escape(event.time),
                                        cgi.escape(event.title))
+            html += "<ul>"
             if event.location != "":
-                html += "<ul><li>{}</li></ul>".format(
-                    cgi.escape(event.location))
-            html += "</li>\n"
+                html += "<li>{}</li>".format(cgi.escape(event.location))
+            if event.url:
+                html += "<li>{}</li>".format(cgi.escape(event.url))
+            if event.phone:
+                html += "<li>{}</li>".format(cgi.escape(event.phone))
+            if event.note:
+                html += "<li>{}</li>".format(cgi.escape(event.note))
+            html += "</ul></li>\n"
         html += "</ul>\n"
         return html
 
@@ -323,7 +347,7 @@ class DiaryCmd(Command):
         cmd.extend(["-nc"])  # No calendar titles
 
         # Fields to display, in order
-        fields = "title,datetime,location"
+        fields = "title,datetime,location,notes"
         cmd.extend(["-iep", fields])
         cmd.extend(["-po", fields])
 
@@ -356,9 +380,21 @@ class DiaryCmd(Command):
             location_match = re.search("location: (.*)",
                                        raw_event, flags=re.M)
             location = location_match.group(1) if location_match else ""
-            self.debug("Event found: \"{}\" time: {} location: {}".format(
-                    title, time, location))
-            events.append(Event(title, location, time))
+            notes_match = re.search("notes: (.*)", raw_event, flags=re.DOTALL)
+            notes = notes_match.group(1) if notes_match else ""
+
+            # Parse tags out of notes field
+            url_match = re.search("@url: (\S+)$", notes, flags=re.M)
+            url = url_match.group(1) if url_match else None
+            phone_match = re.search("@phone: (.+)$", notes, flags=re.M)
+            phone = phone_match.group(1) if phone_match else None
+            note_match = re.search("@note: (.+)$", notes, flags=re.M)
+            note = note_match.group(1) if note_match else None
+
+            event = Event(title, location, time,
+                          url=url, phone=phone, note=note)
+            self.debug("Event found:" + str(event))
+            events.append(event)
         return events
 
     @classmethod
