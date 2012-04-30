@@ -188,7 +188,7 @@ class DiaryCmd(Command):
         except EverNoteException as e:
             self.output("Error trying to find today's diary: " + str(e))
             raise
-        if todays_note:
+        if todays_note and not args.force:
             self.output(
                 "Opening existing diary: {}".format(todays_note.title()))
         else:
@@ -370,6 +370,11 @@ class DiaryCmd(Command):
         """
         parser = subparsers.add_parser("diary", help="daily diary")
         parser.set_defaults(cmd_class=cls)
+        parser.add_argument("-f", "--force",
+                            action='store_const', const=True,
+                            dest="force", default=False,
+                            help="Force creation of new diary")
+
 
 ######################################################################
 #
