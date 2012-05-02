@@ -60,6 +60,11 @@ class EverNote(object):
         return note
 
     @classmethod
+    def get_notes_from_notebook(cls, notebook):
+        """Return all notes in a given notebook"""
+        return cls.find_notes("", notebook=notebook)
+    
+    @classmethod
     def open_collection_window(cls, query_string=None):
         """Open a collection window"""
         # TODO: handle other arguments besides query_string
