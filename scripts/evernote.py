@@ -212,8 +212,11 @@ class DiaryCmd(Command):
         else:
             self.output("Creating new diary for {}".format(self.title))
             template = self.get_template()
-            html = template.format(events=self.get_events_as_html(),
-                                   todos=self.get_todos_as_html())
+            # XXX decode()s here are hacks until I figure out how to deal
+            #     with unicode for real.
+            events = self.get_events_as_html().decode('utf8', 'ignore')
+            todos = self.get_todos_as_html().decode('utf8', 'ignore')
+            html = template.format(events=events, todos=todos)
             try:
                 todays_note = EverNote.create_note(with_html=html,
                                                    title=self.title,
