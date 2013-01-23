@@ -4,14 +4,68 @@
 import argparse
 import ConfigParser
 from datetime import date
+import imp
 import logging
 import os
+import os.path
+import string
 import sys
 
-from everscript import EverNote
+from everscript import EverNote, EverNoteException, Plugin
 
 # Note book containing my diary entries
 DIARY_NOTEBOOK="Diary"
+
+######################################################################
+
+class MyConfigParser(ConfigParser.SafeConfigParser):
+    """ConfigParser that provides defaults instead of raising Exceptions"""
+
+    def get(self, section, variable, default=None):
+        """Return value from section or default if it doesn't exist"""
+        try:
+            value = ConfigParser.SafeConfigParser.get(self, section, variable)
+        except (ConfigParser.NoOptionError,
+                ConfigParser.NoSectionError) as e:
+            value = default
+        return value
+
+######################################################################
+
+class PlugInFormatter(string.Formatter):
+    """Format strings using plugins for keywords
+
+    Plugins are files in plug_in_path of the form <key>.py"""
+
+    def __init__(self, plug_in_path=None, logger=None, config=None):
+        self.plug_in_path = plug_in_path
+        self.cache = {}
+        Plugin.set_config(config)
+        Plugin.set_logger(logger)
+
+    def get_value(self, key, args, kwargs):
+        """Override default get_value, preferring plugins if found."""
+        if isinstance(key, str) or isinstance(key, unicode):
+            plugin = self._get_plugin(key)
+            if plugin:
+                return plugin
+        # Default to parent...
+        return string.Formatter.get_value(self, key, args, kwargs)
+
+    def _get_plugin(self, key):
+        """Load the given plugin"""
+        if not self.plug_in_path:
+            return None
+        plugin_file = os.path.join(self.plug_in_path, key + ".py")
+        if not os.path.exists(plugin_file):
+            return None
+        if not self.cache.has_key(key):
+            mod = imp.load_source("plugin.{}".format(key),
+                                  plugin_file)
+            self.cache[key] = mod.Plugin()
+        return self.cache[key]
+
+######################################################################
 
 def main(argv=None):
     # Do argv default this way, as doing it in the functional
@@ -56,7 +110,7 @@ def main(argv=None):
     args = parser.parse_args()
     output_handler.setLevel(args.output_level)
 
-    config = ConfigParser.SafeConfigParser()
+    config = MyConfigParser()
     conf_path = os.path.expanduser(args.config)
     if os.path.exists(conf_path):
 	output.debug("Parsing configuration file {}".format(args.config))
@@ -65,10 +119,8 @@ def main(argv=None):
     title = date.today().strftime("%B %d, %Y")
     output.debug("Today's note title is: {}".format(title))
 
-    try:
-	notebook = config.get("Diary", "Notebook")
-    except (ConfigParser.NoOptionError,
-	    ConfigParser.NoSectionError) as e:
+    notebook = config.get("Diary", "Notebook")
+    if not notebook:
 	output.error("No Diary notebook defined in configuration")
 	sys.exit(1)
 
@@ -87,19 +139,21 @@ def main(argv=None):
     else:
         output.debug("Creating new diary: {}".format(title))
         try:
-            template_title = config.get("Diary", "Template")
+            template_title = config.get("Diary", "Template", "Template")
             output.debug("Using template: {}".format(template_title))
             template_note = EverNote.find_notes(template_title,
                                                 notebook=notebook)[0]
             template = template_note.content()
-        except (ConfigParser.NoOptionError,
-                ConfigParser.NoSectionError) as e:
-            pass  # No template defined
         except EverNoteException as e:
             output.exception("Error finding diary template")
             sys.exit(1)
 
-        html = template.format(events="", todo="")
+        pluginpath = config.get("Diary", "PlugInPath",
+                                os.path.join(os.path.dirname(conf_path),
+                                             "plugins"))
+        output.debug("Plug-in path: {}".format(pluginpath))
+        formatter = PlugInFormatter(pluginpath, config=config, logger=output)
+        html = formatter.format(template)
         try:
             note = EverNote.create_note(with_html=html,
                                         title=title,
