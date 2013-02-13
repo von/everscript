@@ -60,7 +60,7 @@ class PlugInFormatter(string.Formatter):
         if not os.path.exists(plugin_file):
             return None
         if not self.cache.has_key(key):
-            mod = imp.load_source("plugin.{}".format(key),
+            mod = imp.load_source("everscript.{}".format(key),
                                   plugin_file)
             self.cache[key] = mod.Plugin()
         return self.cache[key]
